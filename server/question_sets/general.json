@@ -1,0 +1,31 @@
+{
+  "id": "general",
+  "name": "General Knowledge",
+  "questions": [
+    {
+      "prompt": "What is the capital city of Australia?",
+      "options": ["Sydney", "Melbourne", "Canberra", "Perth"],
+      "correctIndex": 2
+    },
+    {
+      "prompt": "Which planet in our solar system has the most moons?",
+      "options": ["Earth", "Jupiter", "Mars", "Saturn"],
+      "correctIndex": 3
+    },
+    {
+      "prompt": "Who wrote the novel \"1984\"?",
+      "options": ["George Orwell", "Aldous Huxley", "Ray Bradbury", "J.R.R. Tolkien"],
+      "correctIndex": 0
+    },
+    {
+      "prompt": "What gas do plants primarily absorb for photosynthesis?",
+      "options": ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Which sea creature has three hearts?",
+      "options": ["Octopus", "Shark", "Dolphin", "Swordfish"],
+      "correctIndex": 0
+    }
+  ]
+}
