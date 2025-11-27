@@ -14,6 +14,13 @@ const DIST_DIR = path.join(__dirname, "..", "client", "dist");
 
 app.use(cors());
 app.use(express.json());
+// Allow both "/api/..." and bare paths to hit the same handlers in production.
+app.use((req, _res, next) => {
+  if (req.url.startsWith("/api/")) {
+    req.url = req.url.replace(/^\/api/, "");
+  }
+  next();
+});
 
 const players = new Map(); // playerId -> { id, nickname, score }
 let question = {
@@ -405,7 +412,7 @@ app.post("/reset", (_req, res) => {
 if (existsSync(DIST_DIR)) {
   app.use(express.static(DIST_DIR));
   app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api")) return next();
+    if (req.originalUrl.startsWith("/api")) return next();
     res.sendFile(path.join(DIST_DIR, "index.html"));
   });
 }
