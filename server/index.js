@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 4000;
 const QUESTION_POINTS = Number(process.env.QUESTION_POINTS || 10);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SETS_DIR = path.join(__dirname, "question_sets");
+const DIST_DIR = path.join(__dirname, "..", "client", "dist");
 
 app.use(cors());
 app.use(express.json());
@@ -400,6 +401,14 @@ app.post("/reset", (_req, res) => {
   broadcastState();
   res.json({ cleared: true });
 });
+
+if (existsSync(DIST_DIR)) {
+  app.use(express.static(DIST_DIR));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    res.sendFile(path.join(DIST_DIR, "index.html"));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`Quiz server ready on http://localhost:${PORT}`);

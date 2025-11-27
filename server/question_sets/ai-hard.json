@@ -1,0 +1,66 @@
+{
+  "id": "ai-challenge",
+  "name": "AI Challenge - HARD",
+  "questions": [
+    {
+      "prompt": "Which neural network component is primarily responsible for capturing long-range dependencies in Transformer models?",
+      "options": ["Recurrent layers", "Self-attention", "Convolutional filters", "Pooling layers"],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "In reinforcement learning, what does the discount factor (gamma) control?",
+      "options": [
+        "The exploration rate of the agent",
+        "The importance of future rewards",
+        "The randomness of the policy",
+        "The size of the replay buffer"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Which optimization algorithm adapts learning rates per-parameter using first and second moment estimates?",
+      "options": ["SGD with momentum", "Adam", "Adagrad", "RMSProp"],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "What is a key advantage of contrastive learning in representation learning?",
+      "options": [
+        "It removes the need for any labels",
+        "It guarantees linear separability",
+        "It leverages positive and negative pairs to shape embedding space",
+        "It eliminates overfitting by reducing model size"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "prompt": "Which technique is commonly used to prevent exposure bias in sequence-to-sequence models during training?",
+      "options": ["Dropout", "Scheduled sampling", "Weight decay", "Gradient clipping"],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "In diffusion models, the forward process typically adds what to the data?",
+      "options": ["Gaussian noise over many steps", "Salt-and-pepper noise in one step", "Random crops", "Dropout masks"],
+      "correctIndex": 0
+    },
+    {
+      "prompt": "Which loss is often used for language modeling with a fixed vocabulary?",
+      "options": ["Mean squared error", "Binary cross-entropy", "Categorical cross-entropy", "Triplet loss"],
+      "correctIndex": 2
+    },
+    {
+      "prompt": "Layer normalization differs from batch normalization mainly because it normalizes across:",
+      "options": ["Batch dimension only", "Feature dimension per sample", "Time dimension only", "Weight parameters"],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Which method is used to align instruction-following models with human preferences?",
+      "options": ["Knowledge distillation", "Reinforcement learning from human feedback", "Bayesian optimization", "Transfer learning"],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "In computer vision, which architecture first popularized skip connections to alleviate vanishing gradients?",
+      "options": ["VGG", "Inception", "ResNet", "DenseNet"],
+      "correctIndex": 2
+    }
+  ]
+}
