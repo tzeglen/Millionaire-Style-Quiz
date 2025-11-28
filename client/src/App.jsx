@@ -367,6 +367,50 @@ function App() {
           </div>
         </div>
 
+        {isHost && (
+          <div className="card">
+            <div className="card-header">
+              <h2>Game control</h2>
+              <span className="badge">{activeSetLabel}</span>
+            </div>
+            <div className="stack">
+              <div className="actions">
+                <button
+                  className="primary"
+                  onClick={nextFromSet}
+                  disabled={!activeSet || currentQuestion?.status === "active"}
+                >
+                  Next question
+                </button>
+                <button
+                  className="primary ghost"
+                  onClick={revealFromSet}
+                  disabled={!activeSet || currentQuestion?.status !== "active"}
+                >
+                  Reveal answer
+                </button>
+                {!confirmRestart ? (
+                  <button className="secondary danger" onClick={() => setConfirmRestart(true)}>
+                    Restart game
+                  </button>
+                ) : (
+                  <div className="confirm-row">
+                    <span className="muted">Restart game?</span>
+                    <div className="actions">
+                      <button className="secondary danger" onClick={restartGame}>
+                        Yes
+                      </button>
+                      <button className="secondary" onClick={() => setConfirmRestart(false)}>
+                        No
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="card accent">
           <div className="card-header">
             <h2>Current question</h2>
@@ -416,172 +460,6 @@ function App() {
           )}
         </div>
 
-        {isHost && (
-          <>
-            <div className="card">
-              <div className="card-header">
-                <h2>Question sets</h2>
-                <span className="badge">{activeSetLabel}</span>
-              </div>
-              <div className="stack">
-                <label className="field inline">
-                  <span>Select set</span>
-                  <select
-                    value={selectedSetId}
-                    onChange={(e) => setSelectedSetId(e.target.value)}
-                  >
-                    {sets.map((set) => (
-                      <option key={set.id} value={set.id}>
-                        {set.name} ({set.total})
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <div className="actions">
-                  <button className="secondary" onClick={startSet} disabled={!selectedSetId}>
-                    Load set
-                  </button>
-                </div>
-                {selectedSet && (
-                  <div className="question-list">
-                    <p className="muted small">
-                      Questions in "{selectedSet.name}" ({selectedSet.total || selectedSet.questions?.length || 0})
-                    </p>
-                    {selectedSet.questions?.map((q, idx) => {
-                      const isCurrent =
-                        activeSet?.id === selectedSet.id &&
-                        activeSet?.index === idx &&
-                        currentQuestion?.status !== "idle";
-                      return (
-                        <div key={idx} className={`question-chip ${isCurrent ? "current" : ""}`}>
-                          <span className="pill quiet">Q{idx + 1}</span>
-                          <span className="prompt">{q.prompt}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {sets.length === 0 && (
-                  <p className="muted">No sets found on server. Add JSON under server/question_sets.</p>
-                )}
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card-header">
-                <h2>Game control</h2>
-                <span className="badge">{activeSetLabel}</span>
-              </div>
-              <div className="stack">
-                <div className="actions">
-                  <button
-                    className="primary"
-                    onClick={nextFromSet}
-                    disabled={!activeSet || currentQuestion?.status === "active"}
-                  >
-                    Next question
-                  </button>
-                  <button
-                    className="primary ghost"
-                    onClick={revealFromSet}
-                    disabled={!activeSet || currentQuestion?.status !== "active"}
-                  >
-                    Reveal answer
-                  </button>
-                  {!confirmRestart ? (
-                    <button className="secondary danger" onClick={() => setConfirmRestart(true)}>
-                      Restart game
-                    </button>
-                  ) : (
-                    <div className="confirm-row">
-                      <span className="muted">Restart game?</span>
-                      <div className="actions">
-                        <button className="secondary danger" onClick={restartGame}>
-                          Yes
-                        </button>
-                        <button className="secondary" onClick={() => setConfirmRestart(false)}>
-                          No
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card-header">
-                <h2>Custom question</h2>
-                <span className="badge">Manual</span>
-              </div>
-              <div className="stack">
-                <label className="field">
-                  <span>Question</span>
-                  <textarea
-                    value={questionForm.prompt}
-                    onChange={(e) =>
-                      setQuestionForm((prev) => ({ ...prev, prompt: e.target.value }))
-                    }
-                    placeholder="What is the capital of France?"
-                    rows={2}
-                  />
-                </label>
-                {questionForm.options.map((opt, idx) => (
-                  <label key={idx} className="field">
-                    <span>Option {idx + 1}</span>
-                    <input
-                      value={opt}
-                      onChange={(e) => {
-                        const next = [...questionForm.options];
-                        next[idx] = e.target.value;
-                        setQuestionForm((prev) => ({ ...prev, options: next }));
-                      }}
-                      placeholder={`Answer ${idx + 1}`}
-                    />
-                  </label>
-                ))}
-                <button
-                  className="secondary"
-                  onClick={() => setQuestionForm(createBlankQuestion())}
-                >
-                  Clear
-                </button>
-                <button
-                  className="primary"
-                  onClick={submitQuestion}
-                  disabled={!questionForm.prompt.trim()}
-                >
-                  Send question
-                </button>
-                {currentQuestion?.options?.length ? (
-                  <>
-                    <label className="field inline">
-                      <span>Reveal correct</span>
-                      <select
-                        value={revealIndex}
-                        onChange={(e) => setRevealIndex(Number(e.target.value))}
-                      >
-                        {currentQuestion.options.map((opt, idx) => (
-                          <option key={idx} value={idx}>
-                            {String.fromCharCode(65 + idx)} — {opt}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <button
-                      className="primary ghost"
-                      onClick={revealAnswer}
-                      disabled={currentQuestion.status !== "active"}
-                    >
-                      Reveal answer
-                    </button>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </>
-        )}
-
         <div className="card">
           <div className="card-header">
             <h2>Leaderboard</h2>
@@ -605,6 +483,130 @@ function App() {
             ))}
           </div>
         </div>
+
+        {isHost && (
+          <div className="card">
+            <div className="card-header">
+              <h2>Custom question</h2>
+              <span className="badge">Manual</span>
+            </div>
+            <div className="stack">
+              <label className="field">
+                <span>Question</span>
+                <textarea
+                  value={questionForm.prompt}
+                  onChange={(e) =>
+                    setQuestionForm((prev) => ({ ...prev, prompt: e.target.value }))
+                  }
+                  placeholder="What is the capital of France?"
+                  rows={2}
+                />
+              </label>
+              {questionForm.options.map((opt, idx) => (
+                <label key={idx} className="field">
+                  <span>Option {idx + 1}</span>
+                  <input
+                    value={opt}
+                    onChange={(e) => {
+                      const next = [...questionForm.options];
+                      next[idx] = e.target.value;
+                      setQuestionForm((prev) => ({ ...prev, options: next }));
+                    }}
+                    placeholder={`Answer ${idx + 1}`}
+                  />
+                </label>
+              ))}
+              <button
+                className="secondary"
+                onClick={() => setQuestionForm(createBlankQuestion())}
+              >
+                Clear
+              </button>
+              <button
+                className="primary"
+                onClick={submitQuestion}
+                disabled={!questionForm.prompt.trim()}
+              >
+                Send question
+              </button>
+              {currentQuestion?.options?.length ? (
+                <>
+                  <label className="field inline">
+                    <span>Reveal correct</span>
+                    <select
+                      value={revealIndex}
+                      onChange={(e) => setRevealIndex(Number(e.target.value))}
+                    >
+                      {currentQuestion.options.map((opt, idx) => (
+                        <option key={idx} value={idx}>
+                          {String.fromCharCode(65 + idx)} — {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button
+                    className="primary ghost"
+                    onClick={revealAnswer}
+                    disabled={currentQuestion.status !== "active"}
+                  >
+                    Reveal answer
+                  </button>
+                </>
+              ) : null}
+            </div>
+          </div>
+        )}
+
+        {isHost && (
+          <div className="card">
+            <div className="card-header">
+              <h2>Question sets</h2>
+              <span className="badge">{activeSetLabel}</span>
+            </div>
+            <div className="stack">
+              <label className="field inline">
+                <span>Select set</span>
+                <select
+                  value={selectedSetId}
+                  onChange={(e) => setSelectedSetId(e.target.value)}
+                >
+                  {sets.map((set) => (
+                    <option key={set.id} value={set.id}>
+                      {set.name} ({set.total})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="actions">
+                <button className="secondary" onClick={startSet} disabled={!selectedSetId}>
+                  Load set
+                </button>
+              </div>
+              {selectedSet && (
+                <div className="question-list">
+                  <p className="muted small">
+                    Questions in "{selectedSet.name}" ({selectedSet.total || selectedSet.questions?.length || 0})
+                  </p>
+                  {selectedSet.questions?.map((q, idx) => {
+                    const isCurrent =
+                      activeSet?.id === selectedSet.id &&
+                      activeSet?.index === idx &&
+                      currentQuestion?.status !== "idle";
+                    return (
+                      <div key={idx} className={`question-chip ${isCurrent ? "current" : ""}`}>
+                        <span className="pill quiet">Q{idx + 1}</span>
+                        <span className="prompt">{q.prompt}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {sets.length === 0 && (
+                <p className="muted">No sets found on server. Add JSON under server/question_sets.</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {isRevealed && state?.answers?.length ? (
           <div className="card accent">
