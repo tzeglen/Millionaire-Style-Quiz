@@ -26,6 +26,15 @@ app.use((req, _res, next) => {
   next();
 });
 
+// Guard against malformed encoded URLs (common in scanning attempts).
+app.use((err, _req, res, next) => {
+  if (err instanceof URIError) {
+    console.warn("Rejected malformed URI", err.message);
+    return res.status(400).send("Bad request");
+  }
+  next(err);
+});
+
 const players = new Map(); // playerId -> { id, nickname, score }
 let question = {
   id: null,
