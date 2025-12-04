@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import displayBg from "./images/oracle-redbull.png";
 
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
@@ -14,7 +15,9 @@ const fetchJson = async (url, options) => {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data?.message || "Request failed");
+    const error = new Error(data?.message || "Request failed");
+    error.data = data;
+    throw error;
   }
   return data;
 };
@@ -34,6 +37,7 @@ function App() {
   const [questionForm, setQuestionForm] = useState(createBlankQuestion);
   const [revealIndex, setRevealIndex] = useState(0);
   const [status, setStatus] = useState("");
+  const [nicknameSuggestions, setNicknameSuggestions] = useState([]);
   const [connectionState, setConnectionState] = useState("connecting");
   const [sets, setSets] = useState([]);
   const [selectedSetId, setSelectedSetId] = useState("");
@@ -50,6 +54,10 @@ function App() {
   const isRevealed = currentQuestion?.status === "revealed";
   const canAnswer =
     !isHost && !isDisplay && currentQuestion?.status === "active" && !alreadyAnswered;
+  const answersTotal = useMemo(
+    () => (state?.answerCounts || []).reduce((a, b) => a + b, 0),
+    [state?.answerCounts]
+  );
 
   const sortedLeaderboard = useMemo(
     () => state?.leaderboard || [],
@@ -113,19 +121,29 @@ function App() {
     loadSets();
   }, [isHost]);
 
-  const joinGame = async () => {
+  const joinGame = async (nicknameOverride) => {
+    const nameToUse = (nicknameOverride ?? nickname).trim();
+    if (!nameToUse) return;
     try {
       setStatus("Joining...");
+      setNicknameSuggestions([]);
+      const storedId = localStorage.getItem("quiz_player_id") || playerId || "";
       const data = await fetchJson(`${API_BASE}/join`, {
         method: "POST",
-        body: JSON.stringify({ nickname }),
+        body: JSON.stringify({ nickname: nameToUse, playerId: storedId }),
       });
+      setNickname(nameToUse);
       setPlayerId(data.playerId);
       localStorage.setItem("quiz_player_id", data.playerId);
       localStorage.setItem("quiz_nickname", data.nickname);
       setStatus("Ready to play!");
     } catch (error) {
-      setStatus(error.message);
+      if (error.data?.suggestions?.length) {
+        setNicknameSuggestions(error.data.suggestions);
+        setStatus(error.message || "Nickname taken. Choose another.");
+      } else {
+        setStatus(error.message);
+      }
     }
   };
 
@@ -211,6 +229,22 @@ function App() {
     }
   };
 
+  const leaveLobby = async () => {
+    try {
+      await fetchJson(`${API_BASE}/leave`, {
+        method: "POST",
+        body: JSON.stringify({ playerId }),
+      });
+      setStatus("You left the lobby");
+    } catch (error) {
+      setStatus(error.message);
+    } finally {
+      setPlayerId("");
+      setNickname("");
+      setNicknameSuggestions([]);
+    }
+  };
+
   const answeredLabel = () => {
     if (!alreadyAnswered) return "";
     if (!isRevealed) return "Locked";
@@ -222,8 +256,12 @@ function App() {
   };
 
   if (isDisplay) {
+    const displayBackground = `url(${displayBg})`;
     return (
-      <div className="page">
+      <div
+        className="page display-page"
+        style={{ backgroundImage: displayBackground }}
+      >
         <header className="hero">
           <div>
             <p className="eyebrow">Live Trivia Lobby</p>
@@ -275,6 +313,9 @@ function App() {
                     );
                   })}
                 </div>
+                <div className="meta">
+                  <span>Answers: {answersTotal}</span>
+                </div>
               </>
             ) : (
               <p className="muted">Waiting for the host to send the next question.</p>
@@ -286,6 +327,9 @@ function App() {
               <h2>Leaderboard</h2>
               <span className="badge">Top players</span>
             </div>
+            <p className="muted small">
+              Players at 0 pts: {state?.zeroScorePlayers || 0}
+            </p>
             <div className="leaderboard">
               {sortedLeaderboard.length === 0 && (
                 <p className="muted">No players yet. Join to claim the top spot.</p>
@@ -351,17 +395,42 @@ function App() {
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 placeholder="Enter a fun handle"
+                disabled={hasJoined}
               />
             </label>
+            {nicknameSuggestions.length > 0 && !hasJoined && (
+              <>
+                <p className="muted small">That name is taken. Try one of these:</p>
+                <div className="actions">
+                  {nicknameSuggestions.map((option) => (
+                    <button
+                      key={option}
+                      className="secondary"
+                      onClick={() => joinGame(option)}
+                      type="button"
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
             {!hasJoined && (
-              <button className="primary" onClick={joinGame} disabled={!nickname.trim()}>
+              <button className="primary" onClick={() => joinGame()} disabled={!nickname.trim()}>
                 Join Lobby
               </button>
             )}
             {hasJoined && (
-              <p className="muted">
-                Player ID saved locally — {isHost ? "you can host and answer" : "you can start answering"}.
-              </p>
+              <>
+                <p className="muted">
+                  Player ID saved locally — {isHost ? "you can host and answer" : "you can start answering"}.
+                </p>
+                <div className="actions">
+                  <button className="secondary danger" onClick={leaveLobby}>
+                    Leave lobby
+                  </button>
+                </div>
+              </>
             )}
             {status && <p className="status">{status}</p>}
           </div>
@@ -465,6 +534,7 @@ function App() {
             <h2>Leaderboard</h2>
             <span className="badge">Top players</span>
           </div>
+          <p className="muted small">Players at 0 pts: {state?.zeroScorePlayers || 0}</p>
           <div className="leaderboard">
             {sortedLeaderboard.length === 0 && (
               <p className="muted">No players yet. Join to claim the top spot.</p>

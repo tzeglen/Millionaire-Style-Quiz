@@ -4,10 +4,14 @@ import { randomUUID } from "crypto";
 import { existsSync, readdirSync, readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createClient } from "redis";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 const QUESTION_POINTS = Number(process.env.QUESTION_POINTS || 10);
+//const STORE_BACKEND = (process.env.STORE_BACKEND || "memory").toLowerCase();
+const STORE_BACKEND = (process.env.STORE_BACKEND || "redis").toLowerCase();
+const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SETS_DIR = path.join(__dirname, "question_sets");
 const DIST_DIR = path.join(__dirname, "..", "client", "dist");
@@ -40,6 +44,7 @@ let activeSet = null; // { id, name, index, total }
 let activeSetAnswerIndex = null;
 
 const connections = new Set(); // { res, playerId }
+let redisClient = null;
 
 const cleanNickname = (name) =>
   String(name || "")
@@ -54,6 +59,121 @@ const nicknameTaken = (nickname) => {
   return false;
 };
 
+const nicknameTakenBySamePlayer = (nickname, playerId) => {
+  if (!playerId) return false;
+  const player = players.get(playerId);
+  if (!player) return false;
+  return player.nickname.toLowerCase() === nickname.toLowerCase();
+};
+
+const generateNickname = (first) => {
+  const suffixes = [
+    "Slayer",
+    "Rider",
+    "Blade",
+    "Hunter",
+    "Ghost",
+    "Shadow",
+    "Strike",
+    "Storm",
+    "Nova",
+    "Vortex",
+    "Fury",
+    "Drift",
+    "Rogue",
+    "Phantom",
+    "Wolf",
+    "Dragon",
+    "Reaper",
+    "Flash",
+    "Venom",
+    "Spike",
+    "Burst",
+  ];
+
+  const modifiers = ["", "X", "Pro", "Ultra", "Neo", "Dark", "Night", "Zero", "Alpha", "Omega"];
+  const numbers = ["", "07", "13", "99", "404", "777", "1337"];
+
+  const suf = suffixes[Math.floor(Math.random() * suffixes.length)];
+  const mod = modifiers[Math.floor(Math.random() * modifiers.length)];
+  const num = numbers[Math.floor(Math.random() * numbers.length)];
+
+  return first + mod + suf + num;
+};
+
+const stateKey = "quiz:state:v1";
+
+const snapshotState = () => ({
+  players: Array.from(players.values()),
+  question,
+  answers: Array.from(answers.entries()).map(([playerId, value]) => ({
+    playerId,
+    ...value,
+  })),
+  activeSet,
+  activeSetAnswerIndex,
+});
+
+const hydrateState = (data) => {
+  if (!data) return;
+  players.clear();
+  (data.players || []).forEach((p) => {
+    if (p?.id) players.set(p.id, p);
+  });
+  question = {
+    id: data.question?.id || null,
+    prompt: data.question?.prompt || "",
+    options: data.question?.options || [],
+    status: data.question?.status || "idle",
+    correctIndex:
+      data.question?.status === "revealed" ? data.question?.correctIndex : null,
+    createdAt: data.question?.createdAt || null,
+    setId: data.question?.setId || null,
+    setName: data.question?.setName || null,
+    setQuestionIndex:
+      typeof data.question?.setQuestionIndex === "number"
+        ? data.question.setQuestionIndex
+        : null,
+  };
+  answers = new Map();
+  (data.answers || []).forEach((a) => {
+    if (a?.playerId && typeof a.answerIndex === "number") {
+      answers.set(a.playerId, {
+        answerIndex: a.answerIndex,
+        answeredAt: a.answeredAt || null,
+        correct: Boolean(a.correct),
+      });
+    }
+  });
+  activeSet = data.activeSet || null;
+  activeSetAnswerIndex =
+    typeof data.activeSetAnswerIndex === "number"
+      ? data.activeSetAnswerIndex
+      : null;
+};
+
+const persistState = async () => {
+  if (STORE_BACKEND !== "redis" || !redisClient) return;
+  try {
+    await redisClient.set(stateKey, JSON.stringify(snapshotState()));
+  } catch (error) {
+    console.error("Failed to persist state to Redis", error);
+  }
+};
+
+const loadState = async () => {
+  if (STORE_BACKEND !== "redis" || !redisClient) return;
+  try {
+    const raw = await redisClient.get(stateKey);
+    if (raw) {
+      hydrateState(JSON.parse(raw));
+      console.log("State loaded from Redis");
+    }
+  } catch (error) {
+    console.error("Failed to load state from Redis", error);
+  }
+};
+
 const buildAnswerCounts = () => {
   const counts = question.options.map(() => 0);
   answers.forEach(({ answerIndex }) => {
@@ -63,7 +183,17 @@ const buildAnswerCounts = () => {
 };
 
 const sortedLeaderboard = () =>
-  Array.from(players.values()).sort((a, b) => b.score - a.score);
+  Array.from(players.values())
+    .filter((player) => player.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+const countZeroScorePlayers = () => {
+  let count = 0;
+  players.forEach((player) => {
+    if (player.score === 0) count += 1;
+  });
+  return count;
+};
 
 const revealedAnswers = () => {
   if (question.status !== "revealed") return [];
@@ -74,6 +204,33 @@ const revealedAnswers = () => {
     correct: value.correct,
     answeredAt: value.answeredAt,
   }));
+};
+
+const disconnectPlayer = (playerId) => {
+  if (!playerId) return false;
+  let hadConnection = false;
+  connections.forEach((connection) => {
+    if (connection.playerId === playerId) {
+      hadConnection = true;
+      try {
+        connection.res.end();
+      } catch {
+        // ignore
+      }
+      connections.delete(connection);
+    }
+  });
+  return hadConnection;
+};
+
+const getOnlinePlayersCount = () => {
+  const online = new Set();
+  connections.forEach((connection) => {
+    if (connection.playerId && players.has(connection.playerId)) {
+      online.add(connection.playerId);
+    }
+  });
+  return online.size;
 };
 
 const buildState = (requestingPlayerId) => ({
@@ -90,11 +247,12 @@ const buildState = (requestingPlayerId) => ({
       typeof question.setQuestionIndex === "number" ? question.setQuestionIndex : null,
   },
   leaderboard: sortedLeaderboard(),
+  zeroScorePlayers: countZeroScorePlayers(),
   answerCounts:
     question.status === "idle" ? [] : buildAnswerCounts(question.options),
   answers: revealedAnswers(),
   selfAnswer: answers.get(requestingPlayerId) || null,
-  playersOnline: connections.size,
+  playersOnline: getOnlinePlayersCount(),
   activeSet: activeSet
     ? {
         id: activeSet.id,
@@ -201,7 +359,7 @@ const revealWithIndex = (correctIndex) => {
     answers.set(playerId, { ...entry, correct: isCorrect });
   });
   activeSetAnswerIndex = null;
-  broadcastState();
+  persistState().finally(broadcastState);
 };
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
@@ -220,23 +378,43 @@ app.get("/events", (req, res) => {
   const connection = { res, playerId };
   connections.add(connection);
   sendEvent(connection, "state", buildState(playerId));
+  if (playerId && players.has(playerId)) {
+    broadcastState();
+  }
   req.on("close", () => {
     connections.delete(connection);
+    if (playerId && players.has(playerId)) {
+      broadcastState();
+    }
   });
 });
 
-app.post("/join", (req, res) => {
+app.post("/join", async (req, res) => {
   const nickname = cleanNickname(req.body?.nickname);
-  if (nicknameTaken(nickname)) {
-    return res.status(409).json({ message: "Nickname already taken. Pick another." });
+  const providedPlayerId = String(req.body?.playerId || "").trim();
+
+  const isClaimingOwnName = nicknameTakenBySamePlayer(nickname, providedPlayerId);
+  if (nicknameTaken(nickname) && !isClaimingOwnName) {
+    const suggestions = [];
+    while (suggestions.length < 5) {
+      const candidate = generateNickname(nickname);
+      if (!nicknameTaken(candidate) && !suggestions.includes(candidate)) {
+        suggestions.push(candidate);
+      }
+    }
+    return res
+      .status(409)
+      .json({ message: "Nickname already taken. Pick one of these.", suggestions });
   }
-  const id = randomUUID();
-  players.set(id, { id, nickname, score: 0 });
+  const existingPlayer = providedPlayerId ? players.get(providedPlayerId) : null;
+  const id = existingPlayer ? existingPlayer.id : providedPlayerId || randomUUID();
+  players.set(id, { id, nickname, score: existingPlayer?.score || 0 });
+  await persistState();
   res.status(201).json({ playerId: id, nickname, state: buildState(id) });
   broadcastState();
 });
 
-app.post("/question", (req, res) => {
+app.post("/question", async (req, res) => {
   const prompt = String(req.body?.prompt || "").trim();
   const rawOptions = Array.isArray(req.body?.options)
     ? req.body.options
@@ -260,6 +438,7 @@ app.post("/question", (req, res) => {
     setQuestionIndex: null,
   };
   answers = new Map();
+  await persistState();
   broadcastState();
   res.status(201).json({ questionId: question.id });
 });
@@ -277,7 +456,7 @@ app.get("/sets", (_req, res) => {
   res.json({ sets });
 });
 
-app.post("/sets/start", (req, res) => {
+app.post("/sets/start", async (req, res) => {
   const setId = String(req.body?.setId || "").trim();
   const set = questionSets.get(setId);
   if (!set) {
@@ -285,11 +464,12 @@ app.post("/sets/start", (req, res) => {
   }
   activeSet = { id: set.id, name: set.name, index: -1, total: set.questions.length };
   clearQuestionState();
+  await persistState();
   broadcastState();
   res.json({ activeSet });
 });
 
-app.post("/sets/next", (_req, res) => {
+app.post("/sets/next", async (_req, res) => {
   if (!activeSet) {
     return res.status(409).json({ message: "No active set. Start one first." });
   }
@@ -320,6 +500,7 @@ app.post("/sets/next", (_req, res) => {
   activeSet = { ...activeSet, index: nextIndex };
   answers = new Map();
   activeSetAnswerIndex = setQuestion.correctIndex;
+  await persistState();
   broadcastState();
   res.status(201).json({
     questionId: question.id,
@@ -329,7 +510,7 @@ app.post("/sets/next", (_req, res) => {
   });
 });
 
-app.post("/answer", (req, res) => {
+app.post("/answer", async (req, res) => {
   const { playerId, answerIndex, nickname } = req.body || {};
   if (!playerId || typeof playerId !== "string") {
     return res.status(400).json({ message: "Player ID is required." });
@@ -358,11 +539,12 @@ app.post("/answer", (req, res) => {
     answeredAt: Date.now(),
     correct: false,
   });
+  await persistState();
   broadcastState();
   res.json({ received: true });
 });
 
-app.post("/reveal", (req, res) => {
+app.post("/reveal", async (req, res) => {
   if (question.status !== "active") {
     return res.status(409).json({ message: "No active question to reveal." });
   }
@@ -376,10 +558,22 @@ app.post("/reveal", (req, res) => {
   }
 
   revealWithIndex(correctIndex);
+  await persistState();
   res.json({ revealed: true, correctIndex });
 });
 
-app.post("/sets/reveal", (_req, res) => {
+app.post("/leave", async (req, res) => {
+  const playerId = String(req.body?.playerId || "").trim();
+  if (!playerId) {
+    return res.status(400).json({ message: "Player ID is required." });
+  }
+  const removed = disconnectPlayer(playerId);
+  await persistState();
+  broadcastState();
+  res.json({ removed });
+});
+
+app.post("/sets/reveal", async (_req, res) => {
   if (question.status !== "active") {
     return res.status(409).json({ message: "No active question to reveal." });
   }
@@ -396,15 +590,17 @@ app.post("/sets/reveal", (_req, res) => {
     return res.status(400).json({ message: "No stored correct answer for this set question." });
   }
   revealWithIndex(activeSetAnswerIndex);
+  await persistState();
   res.json({ revealed: true, correctIndex: activeSetAnswerIndex });
 });
 
-app.post("/reset", (_req, res) => {
+app.post("/reset", async (_req, res) => {
   clearQuestionState();
   activeSet = null;
   players.forEach((player, id) => {
     players.set(id, { ...player, score: 0 });
   });
+  await persistState();
   broadcastState();
   res.json({ cleared: true });
 });
@@ -420,3 +616,20 @@ if (existsSync(DIST_DIR)) {
 app.listen(PORT, () => {
   console.log(`Quiz server ready on http://localhost:${PORT}`);
 });
+
+const bootstrap = async () => {
+  if (STORE_BACKEND === "redis") {
+    try {
+      redisClient = createClient({ url: REDIS_URL });
+      redisClient.on("error", (err) => console.error("Redis error", err));
+      await redisClient.connect();
+      await loadState();
+      console.log("Redis store enabled");
+    } catch (error) {
+      console.error("Failed to init Redis, falling back to memory", error);
+      redisClient = null;
+    }
+  }
+};
+
+bootstrap();

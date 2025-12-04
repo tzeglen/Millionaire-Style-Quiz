@@ -31,6 +31,13 @@ body {
   padding: 2.5rem 1.5rem 3rem;
   max-width: 1200px;
   margin: 0 auto;
+  background-size: 33% auto;
+  background-position: top right;
+  background-repeat: no-repeat;
+}
+
+.display-page {
+  box-shadow: inset 0 0 0 2000px rgba(4, 16, 31, 0.25);
 }
 
 .hero {
