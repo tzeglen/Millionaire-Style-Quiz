@@ -80,7 +80,7 @@
         "xAI Grok 4",
         "Anthropic Claude Sonnet 4.5"
       ],
-      "correctIndex": 3
+      "correctIndex": 2
     },
     {
       "prompt": "Kto wymyślił architekturę transformera, która jest podstawą działania modeli LLM?",
