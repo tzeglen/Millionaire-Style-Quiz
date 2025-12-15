@@ -23,7 +23,7 @@
       "correctIndex": 2
     },
     {
-      "prompt": "Który wzór na wyliczenie ilorazu skalarnego dwóch wektorów x i y jest poprawny?",
+      "prompt": "Który wzór na wyliczenie iloczynu skalarnego dwóch wektorów x i y jest poprawny?",
       "options": [
         "(x1 + y1) * (x2 + y2) * (x3 + y3)",
         "(x1 * y1) + (x2 * y2) + (x3 * y3)",
