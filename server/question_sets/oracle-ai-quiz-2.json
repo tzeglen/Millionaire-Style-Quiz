@@ -1,0 +1,56 @@
+{
+  "id": "ai_oracle_quiz-2",
+  "name": "AI, Vector Search & Machine Learning Set 2",
+  "questions": [
+    {
+      "prompt": "Podaj domyślną metodę używaną do wyliczania podobieństwa między wektorami w bazie Oracle 26ai:",
+      "options": [
+        "Podobieństwo całkowite",
+        "Podobieństwo kosinusowe",
+        "Podobieństwo różniczkowe",
+        "Podobieństwo częściowe"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Czym jest funkcja straty?",
+      "options": [
+        "Algorytmem wyliczającym prowizje w FY26",
+        "Regresją liniową",
+        "Kwantyfikacją błędów sieci neuronowej",
+        "Odpowiednikiem funkcji wyzysku"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "prompt": "Który wzór na wyliczenie ilorazu skalarnego dwóch wektorów x i y jest poprawny?",
+      "options": [
+        "(x1 + y1) * (x2 + y2) * (x3 + y3)",
+        "(x1 * y1) + (x2 * y2) + (x3 * y3)",
+        "(x1 - y1) / (x2 - y2) / (x3 - y3)",
+        "(x1 / y1) + (x2 / y2) + (x3 / y3)"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Co jest główną rolą mechanizmu atencji (attention) w modelach językowych?",
+      "options": [
+        "Przyspieszenie treningu poprzez równoległe przetwarzanie danych",
+        "Umożliwienie modelowi skupienia się na najistotniejszych fragmentach wejścia",
+        "Redukcja liczby parametrów modelu",
+        "Zapewnienie zgodności modelu z zasadami etyki AI"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Dlaczego w uczeniu maszynowym stosuje się walidację krzyżową (cross-validation)?",
+      "options": [
+        "Aby zwiększyć liczbę danych treningowych",
+        "Aby przyspieszyć proces uczenia modelu",
+        "Aby lepiej ocenić zdolność modelu do generalizacji na nowych danych",
+        "Aby wyeliminować potrzebę testowania modelu"
+      ],
+      "correctIndex": 2
+    }
+  ]
+}

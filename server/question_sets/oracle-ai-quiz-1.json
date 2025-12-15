@@ -1,0 +1,186 @@
+{
+  "id": "ai_oracle_quiz-1",
+  "name": "AI & Oracle Knowledge Quiz Set 1",
+  "questions": [
+    {
+      "prompt": "Rok temu podczas spotkania świątecznego Piotr opowiadał o:",
+      "options": [
+        "Sukcesach działu konsultingu w projektach AI",
+        "Trendach i rozwoju AI na świecie",
+        "Jak przygotować świątecznego karpia",
+        "Wynikach finansowych Oracle Polska"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Ile butelek plastikowych wody mineralnej zużywał Oracle Polska w ciągu jednego roku?",
+      "options": [
+        "około 5000",
+        "około 10000",
+        "około 20000",
+        "około 30000"
+      ],
+      "correctIndex": 3
+    },
+    {
+      "prompt": "Która inicjatywa Oracle jest najbardziej związana z rozwojem lokalnych kompetencji technologicznych?",
+      "options": [
+        "Sieć restauracji Oracle Café",
+        "Program Oracle Academy dla uczelni",
+        "Marketplace z polskimi aplikacjami",
+        "Program doradczy Oracle NextGOV dla rządu RP"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Największa na świecie fabryka / infrastruktura AI powstaje w:",
+      "options": [
+        "Chiny – Future Network Test Facility (sieć superkomputerów)",
+        "Arabia Saudyjska – Neom City AI Factory",
+        "USA – Wisconsin – Microsoft",
+        "USA – Texas – Abilene – projekt Stargate"
+      ],
+      "correctIndex": 3
+    },
+    {
+      "prompt": "Który z modeli LLM jest dostępny jako usługa OCI?",
+      "options": [
+        "OpenAI GPT-5.1 Thinking",
+        "Meta Alpaca 3.3 Multimodal",
+        "Cohere Command R Plus",
+        "Żaden z powyższych"
+      ],
+      "correctIndex": 3
+    },
+    {
+      "prompt": "Czym zajmuje się firma ASML?",
+      "options": [
+        "Maszyny litograficzne do produkcji chipów",
+        "Tworzy komputer kwantowy do zastosowań biznesowych",
+        "Produkcja chipów na potrzeby AMD, Intel, NVIDIA",
+        "Jest dostawcą data center dla OCI"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "prompt": "Jakub Pachocki, znana osoba w świecie AI. Czym się zajmuje?",
+      "options": [
+        "Stworzył najbardziej zaawansowany na świecie model do rozpoznawania twarzy",
+        "Jest jednym z założycieli OpenAI",
+        "Jest Chief Data Scientist w OpenAI",
+        "Jego osobowość jest wzorem dla modeli OpenAI, w tym wszystkich GPT"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "prompt": "Polska firma chciałaby użyć OCI do przetwarzania danych obrazowych. Jaki model powinieneś użyć?",
+      "options": [
+        "Meta Llama 3.2 Vision",
+        "Cohere Command R+",
+        "xAI Grok 4",
+        "Anthropic Claude Sonnet 4.5"
+      ],
+      "correctIndex": 3
+    },
+    {
+      "prompt": "Kto wymyślił architekturę transformera, która jest podstawą działania modeli LLM?",
+      "options": [
+        "OpenAI",
+        "Massachusetts Institute of Technology (MIT)",
+        "Stanford University",
+        "Google Brain"
+      ],
+      "correctIndex": 3
+    },
+    {
+      "prompt": "Dlaczego temperatura modelu LLM jest ważnym parametrem?",
+      "options": [
+        "Zmniejsza halucynacje",
+        "Zapobiega przegrzaniu się serwerów",
+        "Blokuje konwersacje z użytkownikiem gdy treść jest nieodpowiednia",
+        "Pokazuje administratorowi że model się nudzi"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "prompt": "Co było przełomowego w algorytmie AlphaGo firmy DeepMind?",
+      "options": [
+        "Zintegrował sieć neuronową z uczeniem ze wzmocnieniem",
+        "Analiza wszystkich możliwych ruchów w grze",
+        "Był pierwszym algorytmem korzystającym z kart GPU do akceleracji",
+        "Jako pierwszy program komputerowy wygrał w szachy z G. Kasparowem"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "prompt": "Dwie główne składowe wektora to:",
+      "options": [
+        "Ciężar i objętość",
+        "Target i prowizja",
+        "Smak i kolor",
+        "Moduł i kierunek"
+      ],
+      "correctIndex": 3
+    },
+    {
+      "prompt": "Jak najprościej skorzystać z modelu Bielik w OCI?",
+      "options": [
+        "OCI Generative AI Service",
+        "OCI Data Science",
+        "OCI GPU Compute i Ollama",
+        "Uruchomić Bielika z OCI Marketplace"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Co to jest propagacja wsteczna?",
+      "options": [
+        "Sprzężenie zwrotne",
+        "Zwrot podatku",
+        "Korekta błędów w sieci neuronowej",
+        "Mechanizm atencji"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "prompt": "Dlaczego dwa identyczne zapytania mogą dać różne odpowiedzi?",
+      "options": [
+        "Model się myli",
+        "Model losuje z rozkładu prawdopodobieństwa",
+        "Dane są niespójne",
+        "To błąd systemu"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Co oznacza „embedding” w GenAI?",
+      "options": [
+        "Szyfrowanie danych",
+        "Kompresję modelu",
+        "Trening na GPU",
+        "Zamianę tekstu na wektor liczb"
+      ],
+      "correctIndex": 3
+    },
+    {
+      "prompt": "Pierwsza funkcjonująca sieć neuronowa rozpoznająca cyfry (MNIST) powstała w roku:",
+      "options": [
+        "1973",
+        "1989",
+        "2001",
+        "2022"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "prompt": "Co jest głównym ograniczeniem czysto generatywnego modelu?",
+      "options": [
+        "Wolne działanie",
+        "Brak dostępu do aktualnych danych",
+        "Zbyt duża dokładność",
+        "Trudna instalacja"
+      ],
+      "correctIndex": 1
+    }
+  ]
+}
