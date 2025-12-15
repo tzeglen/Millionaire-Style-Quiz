@@ -8,6 +8,7 @@ SERVER_DIR="$ROOT_DIR/server"
 REDIS_URL="${REDIS_URL:-redis://localhost:6379}"
 PORT="${PORT:-4000}"
 VITE_API_URL="${VITE_API_URL:-}"
+LOG_FILE="${LOG_FILE:-$SERVER_DIR/server.log}"
 
 echo "Checking Redis at ${REDIS_URL}..."
 if command -v redis-cli >/dev/null 2>&1; then
@@ -25,6 +26,8 @@ echo "Installing + building client..."
 echo "Installing server deps..."
 (cd "$SERVER_DIR" && npm ci)
 
-echo "Starting server on port ${PORT} with Redis backend..."
+echo "Starting server on port ${PORT} with Redis backend (background, logs -> ${LOG_FILE})..."
 cd "$SERVER_DIR"
-PORT="$PORT" REDIS_URL="$REDIS_URL" STORE_BACKEND=redis npm start
+PORT="$PORT" REDIS_URL="$REDIS_URL" STORE_BACKEND=redis nohup npm start >"$LOG_FILE" 2>&1 &
+SERVER_PID=$!
+echo "Server PID: ${SERVER_PID}"
