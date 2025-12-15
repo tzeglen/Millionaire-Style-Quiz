@@ -529,30 +529,32 @@ function App() {
           )}
         </div>
 
-        <div className="card">
-          <div className="card-header">
-            <h2>Leaderboard</h2>
-            <span className="badge">Top players</span>
-          </div>
-          <p className="muted small">Players at 0 pts: {state?.zeroScorePlayers || 0}</p>
-          <div className="leaderboard">
-            {sortedLeaderboard.length === 0 && (
-              <p className="muted">No players yet. Join to claim the top spot.</p>
-            )}
-            {sortedLeaderboard.map((player, idx) => (
-              <div
-                key={player.id}
-                className={`leader ${player.id === playerId ? "self" : ""}`}
-              >
-                <div>
-                  <span className="rank">#{idx + 1}</span>
-                  <strong>{player.nickname}</strong>
+        {isHost && (
+          <div className="card">
+            <div className="card-header">
+              <h2>Leaderboard</h2>
+              <span className="badge">Top players</span>
+            </div>
+            <p className="muted small">Players at 0 pts: {state?.zeroScorePlayers || 0}</p>
+            <div className="leaderboard">
+              {sortedLeaderboard.length === 0 && (
+                <p className="muted">No players yet. Join to claim the top spot.</p>
+              )}
+              {sortedLeaderboard.map((player, idx) => (
+                <div
+                  key={player.id}
+                  className={`leader ${player.id === playerId ? "self" : ""}`}
+                >
+                  <div>
+                    <span className="rank">#{idx + 1}</span>
+                    <strong>{player.nickname}</strong>
+                  </div>
+                  <span className="score">{player.score} pts</span>
                 </div>
-                <span className="score">{player.score} pts</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {isHost && (
           <div className="card">
