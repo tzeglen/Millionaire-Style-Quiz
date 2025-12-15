@@ -47,7 +47,7 @@
       "options": [
         "OpenAI GPT-5.1 Thinking",
         "Meta Alpaca 3.3 Multimodal",
-        "Cohere Command R Plus",
+        "Cohere Comando R Plus",
         "Żaden z powyższych"
       ],
       "correctIndex": 3
