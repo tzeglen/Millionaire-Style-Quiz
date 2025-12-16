@@ -35,9 +35,9 @@
     {
       "prompt": "Co jest główną rolą mechanizmu atencji (attention) w modelach językowych?",
       "options": [
-        "Przyspieszenie treningu poprzez równoległe przetwarzanie danych",
-        "Umożliwienie modelowi skupienia się na najistotniejszych fragmentach wejścia",
-        "Redukcja liczby parametrów modelu",
+        "Osadzanie całostek w wielowymiarowej przestrzeni",
+        "Umożliwienie modelowi odniesienia danego wyrazu do kontekstu",
+        "Redukcja liczby parametrów modelu”",
         "Zapewnienie zgodności modelu z zasadami etyki AI"
       ],
       "correctIndex": 1
@@ -51,6 +51,39 @@
         "Aby wyeliminować potrzebę testowania modelu"
       ],
       "correctIndex": 2
+    },
+    {
+      "prompt": "Które stwierdzenie najlepiej opisuje fundamentalne ograniczenie algorytmu k-means?",
+      "options": [
+        "Nie skaluje się do dużych zbiorów danych",
+        "Nie może być stosowany do danych numerycznych",
+        "Zawsze znajduje globalne minimum funkcji celu",
+        "Wymaga wcześniejszego określenia liczby klastrów oraz zakłada ich kulisty kształt"
+      ],
+      "correctIndex": 3
+    },
+    {
+      "prompt": "Funkcja sigmoidalna jest przykładem:",
+      "options": [
+        "Funkcji aktywacji w neuronie",
+        "Metody wyceniania licencji on premises",
+        "Odwrotnością funckji Z",
+        "Agentem we Fusion Apps"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "prompt": "Jaki jest maksymalny wymiar wektora, który można zappisać w Bazie Oracle 26ai:",
+      "options": [
+        "2048",
+        "18 257",
+        "65 535",
+        "100 876"
+      ],
+      "correctIndex": 2
     }
+
+
+
   ]
 }
