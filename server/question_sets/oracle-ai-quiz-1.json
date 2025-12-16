@@ -3,6 +3,16 @@
   "name": "AI & Oracle Knowledge Quiz Set 1",
   "questions": [
     {
+      "prompt": "Na parterze budynku Warsaw Hub przy drzewku znajduje się:",
+      "options": [
+        "Mikołaj ubrany w czerwoną kurtkę i bokserki",
+        "Grinch niezadowolony z tego że zbliżają się święta",
+        "Machający nogami skrzat świąteczny wbity głową w drzewo",
+        "Renifer zjadający prezenty"
+      ],
+      "correctIndex": 2
+    },
+    {
       "prompt": "Rok temu podczas spotkania świątecznego Piotr opowiadał o:",
       "options": [
         "Sukcesach działu konsultingu w projektach AI",

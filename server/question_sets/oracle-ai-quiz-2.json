@@ -1,6 +1,6 @@
 {
   "id": "ai_oracle_quiz-2",
-  "name": "AI, Vector Search & Machine Learning Set 2",
+  "name": "AI & Oracle Knowledge Quiz Set 2",
   "questions": [
     {
       "prompt": "Podaj domyślną metodę używaną do wyliczania podobieństwa między wektorami w bazie Oracle 26ai:",
